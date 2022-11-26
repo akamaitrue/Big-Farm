@@ -1,0 +1,81 @@
+
+## Progetto Big farm
+
+
+Si chiede di realizzare un progetto che implementa lo schema di comunicazione tra processi e thread mostrato in figura:
+
+
+Il progetto è composto da tre processi, il primo in C denominato *MasterWorker* (eseguibile `farm`); il secondo  in Python denominato *Collector* (eseguibile `collector.py`) il terzo in C denominato *Client* (eseguibile `client`). 
+
+*MasterWorker* è un processo multi-threaded composto da un thread Master e da `n` thread Worker (il numero di thread Worker può essere variato utilizzando l’argomento opzionale `-n`, vedere nel seguito). Il programma prende come argomenti sulla linea di comando una lista di file binari contenenti interi lunghi (`long`) ed un certo numero di argomenti opzionali (opzioni `-n`, `-q` e `-t` discusse nelle note). 
+
+Il processo *Collector* deve essere lanciato indipendentemente dal processo *MasterWorker* e non prende argomenti sulla linea di comando. I due processi comunicano attraverso una connessione socket `INET/STREAM` (TCP) usando per semplicità l’indirizzo `localhost`. Il processo *Collector* deve svolgere il ruolo di server e deve essere in grado di gestire più client contemporaneamente, eventualmente usando più thread.
+
+Il processo *Client* effettua delle interrogazioni al *Collector* sui dati che ha ricevuto dal *MasterWorker*.
+
+Più dettagliatamente:
+
+* Il processo *MasterWorker* legge i nomi dei file passati sulla linea di comando e li passa uno alla volta (con eventuali altri parametri) ai thread Worker mediante il meccanismo produttori/consumatori. Il generico thread Worker si occupa di leggere il contenuto del file ricevuto in input e di calcolare la somma:
+dove `N` è il numero dei `long` nel file, `file[i]` è l'i-esimo `long` del file. Questo valore deve essere inviato, unitamente al nome del file, al processo  *Collector*. 
+
+* Il processo *MasterWorker* deve gestire il segnale SIGINT. Alla ricezione di tale segnale il processo deve completare i task eventualmente presenti nel buffer/produttori consumatori e terminare dopo aver deallocato la memoria utilizzata e cancellato ogni eventuale file temporaneo. Se non viene inviato il segnale SIGINT, la procedura qui sopra deve essere seguita quando sono stati processati tutti i file passati sulla linea di comando.
+
+* Il processo *Client* prende come input sulla linea di comando una sequenza di `long` e per ognuno di essi chiede al *Collector* se ha ricevuto dal *MasterWorker* nomi di file con associato quella somma (il *Client* deve fare una richiesta distinta al server per ogni intero). Se invece il *Client* viene invocato senza argomenti sulla linea di comando, deve inviare una richiesta speciale al *Collector* di elencare tutte le coppie `somma`, `nomeFile` che lui ha ricevuto. In ogni caso, per ogni richiesta il *Client* deve visualizzare su `stdout` le coppie `somma`, `nome` ricevute dal server, o la stringa `Nessun file` nel caso il server non contenga coppie che soddifano i requisiti. Per convertire i valori `long` passati sulla linea di comandi il *Client* deve usare la funzione `strtol(3)`
+
+
+* Il processo *Collector* svolge il ruolo di un server e riceve tre tipi di richieste: dai Worker la richiesta di memorizzare una data coppia `somma`, `nomefile`, e dal *Client* o la richiesta di elencare tutte le coppie, oppure la richiesta di elencare le coppie con una data somma. Il *Collector* non deve rispodere nulla al primo tipo di richiesta (quella dei Worker) mentre per le richieste di tipo 2 e 3 deve restituire al *Client* l'elenco delle coppie `somma`, `nomefile` ordinate per somma crescente. Il server non termina spontaneamente ma rimane sempre in attesa di nuove interrogazioni. 
+
+Si noti che fa parte dell'esercizio stabilire un protocollo per le interrogazioni al server, in quanto esso non può conoscere in anticipo quale tipo di richiesta riceverà di volta in volta (suggerimento: la richiesta dovrebbe inizare con un codice che ne indica il tipo). 
+
+
+### Note
+
+Gli argomenti che opzionalmente possono essere passati al processo MasterWorker sono i seguenti:
+
+*  `-n nthread` specifica il numero di thread Worker del processo MasterWorker (valore di default 4)
+
+*  `-q qlen` specifica la lunghezza del buffer produttori/consumatori (valore di default 8)
+
+ * `-t delay` specifica un tempo in millisecondi che intercorre tra una scrittura e la successiva sul buffer produttori/consumatori da parte del thread Master (serve per il debugging, valore di default 0). Per realizzare il ritardo utilizzare la funzione `usleep(3)` che accetta come argomento un ritardo espresso in *microsecondi*.
+
+Per leggere le opzioni sulla riga di comando utilizzare la funzione `getopt(3)`; un esempio d’uso si trova in fondo alla pagina man
+
+La dimensione dei file in input non è limitata ad un valore specifico. Si supponga che la lunghezza del nome dei file sia non superiore a 255 caratteri. 
+
+
+### Materiale fornito
+
+* Un programma `somme.py` che calcola la somma per tutti i file passati sulla linea di comando (`somme.py -h` per l'help)
+* Un programma `gensomma.py` che genera un file con un numero assegnato di `long` e possibilmente con una somma assegnata (`gensomma.py -h` per l'help)
+* Il file `z0.dat` contenente 3 `long` con somma 9876543210 (notate che questo valore non si rappresenta in 32 bit!)
+*  Il file `z1.dat` contenente 3 `long` con somma -1 (così siamo sicuri che tutto funziona anche con interi negativi) 
+
+
+
+### Consegna del progetto
+
+La consegna deve avvenire esclusivamente mediante [GitHub](https://www.github.com/login). Se non lo avete già [createvi un account](https://docs.github.com/en/get-started/quickstart/hello-world) e create un repository **privato** dedicato a questo compito. Aggiungete come collaboratore al repository l’utente `Laboratorio2B` in modo che i docenti abbiano accesso al codice. **IMPORTANTE:** la consegna effettiva del progetto per un dato appello consiste nello scrivere l'url per la clonazione del vostro progetto nell'apposito contenitore consegna su moodle. L'url deve essere della forma `git@github.com:user/progetto.git` (non deve quindi iniziare per `https`). Dopo la data di consegna **non dovete** fare altri commit al progetto.
+
+Il repository deve contenere tutti i file del progetto oltre ai file menzionati sopra. Il makefile deve essere scritto in modo che la sequenza di istruzioni sulla linea di comando (`progetto` indica il nome del repository, voi usate un nome meno generico):
+```
+git clone git@github.com:user/progetto.git
+cd progetto
+make
+./collector.py &      # parte il server in background
+./client -1           # chiede coppie con somma -1
+./farm z?.dat         # invia i file z0.dat e z1.dat
+./client 9876543210 1 # chiede coppie con somma data
+./client              # chiede tutte le coppie 
+pkill collector.py    # termina il server
+```
+non restituisca errori e generi l'output
+```
+Nessun file        (risposta alla richiesta di somma -1)
+9876543210 z0.dat  (risposta alla richiesta di somma 9876543210)
+Nessun file        (risposta alla richiesta di somma 1)
+        -1 z1.dat  (risposta alla richiesta di tutte le coppie)
+9876543210 z0.dat
+```
+Verificate su `laboratorio2.di.unipi.it`, *partendo da una directory vuota*, che non ci siano errori e che l'output corrisponda. Questo è un requisito *minimo* per la sufficienza; altri test saranno fatti durante la correzione ma sempre su `laboratorio2`, e ovviamente sarà valutato anche il codice. Il programma deve gestire in maniera pulita evenutali errori (file non esistenti, server che non risponde etc.). 
+
+Il repository deve contenere anche un file README.md contenente una breve relazione che descrive le principali scelte implementative. Si noti che è possibile gestire un repository GitHub anche da [dentro Replit](https://replit.com/talk/learn/Replit-Git-Tutorial/23331). 

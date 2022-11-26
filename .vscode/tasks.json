@@ -1,0 +1,67 @@
+{
+    "tasks": [
+        {
+            "label": "make active file",
+            "type": "shell",
+            "command": "make",
+            // for all files in the current folder
+            "args": [
+                "${fileBasenameNoExtension}"
+            ],
+            "problemMatcher": "$gcc",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+          },
+          {
+            "label": "run active file executable without debuging",
+            "type": "shell",
+            "command": "${fileDirname}/${fileBasenameNoExtension}.out",
+            "presentation": {
+              "clear": false
+            }
+          },
+          {
+            "label": "make and run active file without debuging",
+            "group": {
+              "kind": "test",
+              "isDefault": true
+            },
+            "dependsOn": [
+              "make active file",
+              "run active file executable without debuging"
+            ],
+            "dependsOrder": "sequence"
+          } ],
+            /*{
+            "type": "cppbuild",
+            "label": "C/C++: gcc compila il file attivo",
+            "command": "/usr/bin/gcc",
+            "args": [
+                "-g",
+                "${file}",
+                "xerrori.c",
+                "-o",
+                "${fileDirname}/${fileBasenameNoExtension}"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Attività generata dal debugger."
+        } */
+    "version": "2.0.0",
+    "runner": "terminal",
+    "presentation": {
+        "clear": true,
+        "focus": true,
+        "panel": "shared"
+      }
+}

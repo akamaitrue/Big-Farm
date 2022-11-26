@@ -1,0 +1,24 @@
+{
+    "files.associations": {
+        "ostream": "c",
+        "farm.c": "c",
+        "xerrori.h": "c",
+        "utils.h": "c",
+        "utils.c": "c",
+        "xerrori.c": "c",
+        "farm.h": "c",
+        "cstdio": "c"
+    },
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/Users/framass/Desktop/Big-Farm-fmass",
+            "binaryPath": "/Users/framass/Desktop/Big-Farm-fmass/farm",
+            "binaryArgs": []
+        },
+        {
+            "cwd": "/Users/framass/Desktop/Big-Farm-fmass",
+            "binaryPath": "/Users/framass/Desktop/Big-Farm-fmass/client",
+            "binaryArgs": []
+        }
+    ]
+}
