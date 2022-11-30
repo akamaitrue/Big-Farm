@@ -38,7 +38,8 @@ void clientTask(int fd, int argc, char *argv[])
 
     int w, tmp;
     char *msg = "Client";
-    asprintf(&msg, "%s %d", msg, argc-1);
+    if (asprintf(&msg, "%s %d", msg, argc-1) < 0)
+      xtermina("Errore asprintf", QUI);
 
     tmp = sizeof(msg);
     w = writen(fd, &tmp, sizeof(tmp));
@@ -63,7 +64,8 @@ void clientTask(int fd, int argc, char *argv[])
       int r, w, itmp, resSize;
       char *ires;
       char *msgToSend = "Client";
-      asprintf(&msgToSend, "%s %s", msgToSend, argv[i]);
+      if (asprintf(&msgToSend, "%s %s", msgToSend, argv[i]) < 0)
+        xtermina("Errore allocazione memoria", QUI);
 
       itmp = strlen(msgToSend);
       w = writen(fd, &itmp, sizeof(itmp));
@@ -82,15 +84,16 @@ void clientTask(int fd, int argc, char *argv[])
         xtermina("Errore lettura da socket", QUI);
 
       resSize = ntohl(itmp);
-
-      ires = (char *) malloc(resSize);
+      ires = (char *) malloc(resSize + 1);
+      ires[resSize] = '\0';
       r = readn(fd, ires, resSize);
       if (r != resSize)
         xtermina("Errore lettura da socket", QUI);
 
+      (void) ires; // avoid compiler warning
       printf("[%d/%d] Ricevuto somma: %s\n", i, argc-1, ires);
-      free(ires);
       free(msgToSend);
+      free(ires);
     }
     free(msg);
   }
@@ -119,14 +122,13 @@ void clientTask(int fd, int argc, char *argv[])
 
     resSize = ntohl(tmp);
 
-    res = (char *) malloc(resSize);
+    res = (char *) malloc(resSize + 1);
+    res[resSize] = '\0';
     r = readn(fd, res, resSize);
     if (r != resSize)
       xtermina("Errore lettura da socket", QUI);
 
-    printf("%s\n", res);
-    if (strcmp(res, "Nessun file") == 0)
-      puts("Nessuna coppia (somma, nomeFile) presente nel Collector");
+    (strcmp(res, "Nessun file") == 0) ? puts("Nessuna coppia (somma, nomeFile) presente nel Collector") : puts(res);
 
     free(res);
   }

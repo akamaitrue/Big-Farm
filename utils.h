@@ -6,7 +6,6 @@
 #define IP "127.0.0.1"
 #define PORT 57849
 #define SA struct sockaddr
-struct sigaction sa;
 
 
 typedef struct {
@@ -22,8 +21,8 @@ typedef struct {
 } buffer_t;
 
 typedef struct {
-    int *gotSIG;
-    int *end;
+    volatile sig_atomic_t gotSIG; // volatile in order to prevent variable getting cached
+    sigset_t *mask;
 } signal_t;
 
 
@@ -34,4 +33,4 @@ void *workerTask(void *buf);
 ssize_t readn(int fd, void *ptr, size_t n);
 ssize_t writen(int fd, void *ptr, size_t n);
 int myIsNumber(char *str);
-//void *handleSIGINT(void *sig);
+void *handleSIG(void *s);

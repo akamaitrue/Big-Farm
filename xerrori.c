@@ -214,7 +214,8 @@ int xsem_wait(sem_t *sem, int linea, char *file) {
 #define Buflen 100
 void xperror(int en, char *msg) {
   char buf[Buflen];
-  int err = strerror_r(en,buf,Buflen);
+  // strerror_r returns int on Linux, char * on Mac OS X
+  int err = atoi(strerror_r(en,buf,Buflen));
   int length = snprintf( NULL, 0, "%d", err);
   char* errmsg = malloc(length + 1);
   snprintf(errmsg, length + 1, "%d", err);

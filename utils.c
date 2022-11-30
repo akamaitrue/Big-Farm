@@ -1,7 +1,6 @@
 #include "utils.h"
 #include "xerrori.h"
 
-struct sigaction sa;
 struct sockaddr_in servaddr;
 
 int parse_args (int argc, char *argv[], options_t *options) {
@@ -84,17 +83,14 @@ char* consumer(buffer_t *buf) {
     
     if (strcmp(buf->filename, POISON_PILL) == 0) {
         //printf("[Worker%ld] Ricevuto poison pill, termino thread...\n", pthread_self());
-        xpthread_cond_signal(buf->not_full, QUI);
-        xpthread_mutex_unlock(buf->buf_lock, QUI);
         return NULL;
     }
     // xpthread_mutex_unlock(buf->buf_lock, QUI);
-    // unlock later in workerTask function
+    // unlock in workerTask function
     return buf->filename;
 }
 
 
-// Il generico thread Worker si occupa di leggere il contenuto del file ricevuto in input e di calcolare la somma, dove `N` è il numero dei `long` nel file, `file[i]` è l'i-esimo `long` del file. Questo valore deve essere inviato, unitamente al nome del file, al processo  *Collector*.
 char* getSomma(char *fname) {
     //printf("Thread%ld, file: %s\n", pthread_self(), fname);
     FILE *fp = xfopen(fname, "r", QUI);
@@ -107,19 +103,16 @@ char* getSomma(char *fname) {
     }
     fclose(fp);
     // https://stackoverflow.com/questions/1383649/concatenating-strings-in-c-which-method-is-more-efficient
-    asprintf(&fname, "%s %ld", fname, somma);
+    if (asprintf(&fname, "%s %ld", fname, somma) < 0)
+        xtermina("Errore asprintf", QUI);
     return fname; // formato <file: somma>
 }
 
-/* Il generico thread Worker si occupa di leggere il contenuto del file ricevuto in input e di calcolare la somma:
-dove `N` è il numero dei `long` nel file, `file[i]` è l'i-esimo `long` del file. Questo valore deve essere inviato, unitamente al nome del file, al processo  *Collector*. */
 
 void *workerTask(void *args) {
     buffer_t *buf = (buffer_t *) args;
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    /* From man page:
-        A -1 is returned if an error occurs, otherwise the return value is a descriptor referencing the socket.
-    */
+    // From man page: -1 is returned if an error occurs, otherwise the return value is a descriptor referencing the socket.
 	if (sockfd == -1)
 	    xtermina("Errore creazione socket", QUI);
     //puts("Socket creata con successo");
@@ -232,21 +225,15 @@ int myIsNumber(char* str) {
 }
 
 
-
-/*
-void *handleSIGINT(void *s) {
-    sigset_t mask;
-    int signal;
-    signal_t *sig = (signal_t *) s;
-    sigfillset(&mask);
-    while(sig->end == 0) { 
-      if (sigwait(&mask, &signal) != 0) {
-        fprintf(stderr,"Errore sigwait");
-        if (signal == SIGINT) { 
-          *sig->gotSIG = 1;
-          pthread_exit(NULL);
-      }
+void *handleSIG(void *args) {
+    signal_t *sigstruct = (signal_t *) args;
+    while (1) {
+        int sig;
+        sigwait(sigstruct->mask, &sig);
+        if (sig == SIGINT) {
+            sigstruct->gotSIG = 1;
+            puts(" Ricevuto segnale SIGINT, termino...");
+            break;
+        }
     }
-    pthread_exit(NULL);
-    }
-} */
+}
