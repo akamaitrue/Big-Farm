@@ -3,8 +3,8 @@
 
 CC = gcc
 CFLAGS = -g -Wall -O -std=gnu99
-#LDLIBS = -lm -lrt -pthread #-lncurses
-LDLIBS = -lm -L/usr/lib/system/ -pthread -lncurses
+#LDLIBS = -lm -lrt -pthread
+LDLIBS = -lm -lrt -pthread
 
 # eseguibili da costruire
 EXECS = farm client
