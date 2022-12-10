@@ -27,7 +27,7 @@ def recv_all(conn,n):
     bytes_recd += len(chunk)
   return chunks
 
-
+# funzione custom per convertire e inviare messaggi via socket
 def sendPacked(conn, msg):
     msg = bytes(msg, "utf-8")
     res = struct.pack("%ds" % (len(msg)), msg)
@@ -35,6 +35,7 @@ def sendPacked(conn, msg):
     conn.sendall(struct.pack("!i", resSize))
     conn.sendall(res)
 
+# funzione custom per convertire e ricevere messaggi via socket
 def recvPacked(conn):
     packedMsgLen = recv_all(conn, 4)
     msgLen = struct.unpack("I", packedMsgLen)[0]
@@ -59,12 +60,12 @@ def handleRequest(conn, addr):
 
                 # se il nomefile è già presente in una coppia (somma, nomefile), ignora la richiesta e stampa un messaggio di errore
                 if req.split()[1] in [n for s, n in somme]:
-                    print(f"File {req.split()[1]} già presente nel collector, ignoro la richiesta...")
+                    #print(f"File {req.split()[1]} già presente nel collector, ignoro la richiesta...")
                     pass
                 else:
                     nomefile, somma = req.split()[1:]
                     somme.append((int(somma), nomefile))
-                    print(f"Memorizzata la coppia ({somma}, {nomefile})")
+                    #print(f"Memorizzata la coppia ({somma}, {nomefile})")
 
             elif reqType == 2:
                 #* richiesta di tipo Client: il messaggio è del tipo "Client <somma>"
@@ -79,6 +80,7 @@ def handleRequest(conn, addr):
                         ris = []
                         for s, n in somme:
                             if s == somma:
+                                # ho trovato una corrispondenza
                                 ris.append((s, n))
                         ris.sort()
                         if (len(ris) == 0):
@@ -95,6 +97,7 @@ def handleRequest(conn, addr):
                         res = "Nessun file"
                         sendPacked(conn,res)
                     else:
+                        # invia tutte le coppie ordinate per somma crescente
                         sommecpy.sort()
                         res = res.join(str(s) + " " + n + "\n" for s, n in sommecpy)
                         sendPacked(conn,res)
@@ -115,6 +118,7 @@ def handleRequest(conn, addr):
 def main(host=HOST, port=PORT):
     gotSIG = False
     
+    # SIGINT handler per terminazione pulita
     def exit_gracefully(signum, frame):
         gotSIG = True
         print(f" Received signal {signum}, exiting gracefully...")
@@ -148,7 +152,7 @@ def main(host=HOST, port=PORT):
                 break
             # mi metto in attesa di una connessione
             conn, addr = server.accept()
-            # quando arriva una connessione, creo un thread che si occupa di gestirla
+            # quando arriva una connessione, la passo ad un thread che si occupa di gestirla
             pool.submit(handleRequest, conn, addr)
 
     except socket.error as e:
