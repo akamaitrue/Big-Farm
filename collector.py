@@ -1,4 +1,3 @@
-import os
 import socket
 import struct
 import sys
@@ -57,9 +56,15 @@ def handleRequest(conn, addr):
 
             if reqType == 1:
                 #* richiesta di tipo Worker: memorizza la coppia `somma`, `nomefile` e non risponde nulla
-                nomefile, somma = req.split()[1:]
-                somme.append((int(somma), nomefile))
-                print(f"Memorizzata la coppia ({somma}, {nomefile})")
+
+                # se il nomefile è già presente in una coppia (somma, nomefile), ignora la richiesta e stampa un messaggio di errore
+                if req.split()[1] in [n for s, n in somme]:
+                    print(f"File {req.split()[1]} già presente nel collector, ignoro la richiesta...")
+                    pass
+                else:
+                    nomefile, somma = req.split()[1:]
+                    somme.append((int(somma), nomefile))
+                    print(f"Memorizzata la coppia ({somma}, {nomefile})")
 
             elif reqType == 2:
                 #* richiesta di tipo Client: il messaggio è del tipo "Client <somma>"
@@ -77,8 +82,9 @@ def handleRequest(conn, addr):
                                 ris.append((s, n))
                         ris.sort()
                         if (len(ris) == 0):
-                            ris = f"Nessun file per la somma {somma}"
+                            ris = f" Nessun file per la somma {somma} "
                         res = str(ris)
+                        res = res[1:-1]
                         sendPacked(conn, res)
 
                 # il messaggio è "Client liste": controlla se la seconda parola è "liste"
@@ -121,10 +127,10 @@ def main(host=HOST, port=PORT):
     # python3.8: signal.valid_signals() | https://docs.python.org/3/library/signal.html#signal.valid_signals
     for sig in signal.valid_signals():
         try:
-            # wait for signal event then catch it and handle it with exit_gracefully function
+            # gestisco eventuali segnali con l'handler exit_gracefully
             signal.signal(sig, exit_gracefully)
         except OSError:
-            # SIGKILL and SIGSTOP are completely handled by Kernel hence cannot be caught, ignored or handled directly by a process
+            # SIGKILL e SIGSTOP sono completamente gestiti dal Kernel, non è possibile gestirli in user space
             # https://docs.python.org/3/library/signal.html
             pass
 
@@ -138,7 +144,7 @@ def main(host=HOST, port=PORT):
 
         while True:
             if gotSIG:
-                # non accetto nuove connessioni
+                # non accetto più nuove connessioni
                 break
             # mi metto in attesa di una connessione
             conn, addr = server.accept()

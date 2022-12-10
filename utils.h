@@ -21,7 +21,7 @@ typedef struct {
 } buffer_t;
 
 typedef struct {
-    volatile sig_atomic_t gotSIG; // volatile in order to prevent variable getting cached
+    volatile sig_atomic_t gotSIG; // volatile per prevenire che la variabile venga ottimizzata (cached)
     sigset_t *mask;
 } signal_t;
 
@@ -29,6 +29,9 @@ typedef struct {
 int parse_args(int argc, char *argv[], options_t *options);
 int producer(buffer_t *buf, char *argvi);
 char* consumer(buffer_t *buf);
+void clientHello(int sockfd, char *msg);
+void sendMsg(int sockfd, char *msg);
+char* getResponse(int sockfd);
 void *workerTask(void *buf);
 ssize_t readn(int fd, void *ptr, size_t n);
 ssize_t writen(int fd, void *ptr, size_t n);

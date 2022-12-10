@@ -1,3 +1,11 @@
+/*
+* @author: Francesco Massellucci
+* @brief: Progetto Big-Farm per il corso di Laboratorio II A.A. 2021/2022
+* @file: farm.c
+* @date: 08/12/2022
+* @version: 2.5
+*/
+
 #include "xerrori.h"
 #include "utils.h"
 
@@ -7,8 +15,10 @@ int main(int argc, char *argv[]) {
   sigs = (signal_t*) malloc(sizeof(signal_t));
   sigs->gotSIG = 0;
   sigs->mask = (sigset_t*) malloc(sizeof(sigset_t));
-  sigemptyset(sigs->mask);
-  //sigfillset(sigs->mask); //con questa maschera posso bloccare tutti i segnali tranne SIGINT, SIGKILL e SIGSTOP
+  sigfillset(sigs->mask); 
+  // con questa maschera posso ignorare tutti i segnali tranne SIGINT, SIGKILL e SIGSTOP
+  //ed eseguire l'handler per la terminazione pulita solo per SIGINT
+  //sigemptyset(sigs->mask);
   sigaddset(sigs->mask, SIGINT);
   pthread_sigmask(SIG_BLOCK, sigs->mask, NULL);
   // la gestione del segnale SIGINT è delegata all'handler
@@ -60,10 +70,11 @@ int main(int argc, char *argv[]) {
       //printf("File %s does not exist\n", argv[i]);
       continue;
     }
-    //! qui inserisce il nome del file nel buffer
+    // inserisce il nome del file nel buffer
     producer(buf_dati, argv[i]);
     if (i != argc-1)
       // all'ultimo inserimento nel buffer non faccio la sleep
+      //printf("Sleeping for %d seconds...\n", options->delay/1000000);
       usleep(options->delay);
   }
 
@@ -72,7 +83,6 @@ int main(int argc, char *argv[]) {
     producer(buf_dati, POISON_PILL);
   }
 
-  
   // attendo terminazione worker threads
   for(int i=0;i<options->nthread;i++) {
       xpthread_join(workers[i], NULL, QUI);
@@ -81,6 +91,7 @@ int main(int argc, char *argv[]) {
   pthread_cancel(handler);
   xpthread_join(handler, NULL, QUI);
 
+  // libero le risorse
   xpthread_mutex_destroy(buf_dati->buf_lock, QUI);
   xpthread_cond_destroy(buf_dati->not_empty, QUI);
   xpthread_cond_destroy(buf_dati->not_full, QUI);

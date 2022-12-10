@@ -74,4 +74,3 @@ int xpthread_cond_destroy(pthread_cond_t *cond, int linea, char *file);
 int xpthread_cond_wait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex, int linea, char *file);
 int xpthread_cond_signal(pthread_cond_t *cond, int linea, char *file);
 int xpthread_cond_broadcast(pthread_cond_t *cond, int linea, char *file);
-
