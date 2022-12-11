@@ -2,8 +2,7 @@
 * @author: Francesco Massellucci
 * @brief: Progetto Big-Farm per il corso di Laboratorio II A.A. 2021/2022
 * @file: farm.c
-* @date: 08/12/2022
-* @version: 2.5
+* @date: 11/12/2022
 */
 
 #include "xerrori.h"
