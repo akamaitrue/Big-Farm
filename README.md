@@ -52,7 +52,7 @@ Client e server (client.c e collector.py) si scambiano messaggi tramite socket, 
 Il Client può inviare al Collector due tipi di messaggi:
 
 * `Client somma1 somma2 ... sommaN-1 sommaN` per interrogare il Collector sull'eventuale presenza di associazioni (somma, nomefile) con una determinata somma\
-In questo caso la comunicazione inizia con il Client che comunica al Collector il numero di somme che richiederà. Questa fase iniziale l'ho denominata clientHello e definito una funzione apposita\
+In questo caso la comunicazione inizia con il Client che comunica al Collector il numero di somme che richiederà.\
 Le somme passate da linea di comando sono controllate una ad una, ignorando quelle invalide. Per fare questo ho scritto una mia funzione custom (myIsNumber), che viene utilizzata anche dal Farm per il parsing dei paramtetri opzionali\
 Dopo il messaggio di hello, il Client invia le somme al server tramite la stessa socket, in maniera sequenziale\
 Il pattern per la comunicazione è il seguente: prima dell'invio della richiesta (response) effettiva, il client (server) invia al server (client) un intero che indica la lunghezza del messaggio, dopodiché si prosegue con l'invio della richiesta (response) vera e propria. Come si può intuire, questo pattern è utilizzato sia client-side che server-side\
