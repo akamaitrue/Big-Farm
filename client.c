@@ -2,7 +2,7 @@
 * @author: Francesco Massellucci
 * @brief: Progetto Big-Farm per il corso di Laboratorio II A.A. 2021/2022
 * @file: client.c
-* @date: 11/12/2022
+* @date: 14/12/2022
 */
 
 #include "xerrori.h"
@@ -55,13 +55,13 @@ void clientTask(int fd, int argc, char *argv[])
       xtermina("Errore allocazione memoria (asprintf)", QUI);
 
     // comunico in anticipo al server il numero di somme che dovrà gestire
-    clientHello(fd, msg);
+    sendMsg(fd, msg);
 
     for (int i = 1; i < argc; i++) {
       // il messaggio è del tipo: "Client: <somma>"
 
       if (myIsNumber(argv[i]) == 0) {
-        fprintf(stderr, "[%d/%d] Errore: il parametro inserito (%s) non è un numero, skipping...\n", i, argc-1, argv[i]);
+        fprintf(stderr, "[%d/%d] Il parametro inserito (%s) non è un numero, skipping...\n", i, argc-1, argv[i]);
         continue;
       }
 

@@ -71,9 +71,10 @@ def handleRequest(conn, addr):
             elif reqType == 2:
                 #* richiesta di tipo Client: il messaggio è del tipo "Client <somma>"
 
-                request = req.split()[1].rstrip("\x00")
+                request = req.split()[1]
                 if request.isdigit():
                     n = int(request)
+                    # ricevo n somme che dovrò cercare nella lista
                     for i in range(n):
                         msg = recvPacked(conn)
                         # "Client <somma>" -> la somma è la seconda parola del messaggio ricevuto
@@ -85,23 +86,22 @@ def handleRequest(conn, addr):
                                 ris.append((s, n))
                         ris.sort()
                         if (len(ris) == 0):
-                            ris = f" Nessun file per la somma {somma} "
-                        res = str(ris)
+                            res = f" Nessun file per la somma {somma} "
+                        else:
+                            res = str(ris)
                         res = res[1:-1]
                         sendPacked(conn, res)
 
                 # il messaggio è "Client liste": controlla se la seconda parola è "liste"
                 elif request == "liste":
-                    sommecpy = somme.copy()
-                    res = ""
-                    if len(sommecpy) == 0:
+                    if len(somme) == 0:
                         res = "Nessun file"
-                        sendPacked(conn,res)
                     else:
                         # invia tutte le coppie ordinate per somma crescente
+                        sommecpy = somme.copy()
                         sommecpy.sort()
-                        res = res.join(str(s) + " " + n + "\n" for s, n in sommecpy)
-                        sendPacked(conn,res)
+                        res = "".join(str(s) + " " + n + "\n" for s, n in sommecpy)
+                    sendPacked(conn,res)
                 else:
                     #print(f"Invalid command from {addr}")
                     break

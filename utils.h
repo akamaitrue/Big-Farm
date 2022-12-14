@@ -29,7 +29,6 @@ typedef struct {
 int parse_args(int argc, char *argv[], options_t *options);
 int producer(buffer_t *buf, char *argvi);
 char* consumer(buffer_t *buf);
-void clientHello(int sockfd, char *msg);
 void sendMsg(int sockfd, char *msg);
 char* getResponse(int sockfd);
 void *workerTask(void *buf);

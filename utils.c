@@ -2,7 +2,7 @@
 * @author: Francesco Massellucci
 * @brief: Progetto Big-Farm per il corso di Laboratorio II A.A. 2021/2022
 * @file: utils.c
-* @date: 11/12/2022
+* @date: 14/12/2022
 */
 
 #include "utils.h"
@@ -116,21 +116,6 @@ char* getSomma(char *fname) {
     return fname;
 }
 
-// nel caso di richiesta "Client: <somma1> <somma2> <somma3> ..." invio, come sempre, la lunghezza del messaggio e poi avviso il client di quante somme riceverà
-void clientHello(int fd, char *msg) {
-    int w, tmp;
-
-    tmp = sizeof(msg);
-    w = writen(fd, &tmp, sizeof(tmp));
-    if (w != sizeof(int))
-        xtermina("Errore scrittura su socket", QUI);
-    //printf("Avvisato il socket che il messaggio sarà lungo %lu bytes\n", sizeof(msg));
-
-    w = writen(fd, msg, sizeof(msg));
-    if (w != sizeof(msg))
-        xtermina("Errore scrittura su socket", QUI);
-    //printf("Avvisato il socket che dovrà gestire %d richieste del tipo Client: <somma>\n", argc - 1);
-}
 
 void sendMsg(int fd, char *msg) {
     int w, itmp;
