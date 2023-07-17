@@ -1,7 +1,7 @@
 # Big Farm
 
-Progetto finale per il corso di Laboratorio II A.A. 2021/2022
-Topics: Socket Programming (C/Python), MultiThreading (both in C and Python), Concurrency and Parallel Programming (Mutual exclusion, _Farm Parallelism_), Producer-Consumer Problem.
+Progetto finale per il corso di Laboratorio II A.A. 2021/2022\
+Topics: **Socket Programming (C/Python), MultiThreading (both in C and Python), Concurrency and Parallel Programming (Mutual exclusion, _Farm Parallelism_), Producer-Consumer Problem.**
 
 ## Descrizione del progetto
 
