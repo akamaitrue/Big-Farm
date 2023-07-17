@@ -1,10 +1,11 @@
 # Big Farm
 
 Progetto finale per il corso di Laboratorio II A.A. 2021/2022
+Topics: Socket Programming (C/Python), MultiThreading (both in C and Python), Concurrency and Parallel Programming (Mutual exclusion, _Farm Parallelism_), Producer-Consumer Problem.
 
 ## Descrizione del progetto
 
-Il progetto richiede di realizzare una comunicazione client-server.
+Il progetto richiede di implementare il problema del produttore-consumatore con più workers per sfruttare il parallelismo temporale di tipo farm, il tutto su una comunicazione client-server (client implementato in C, server in python).
 Per il Client ci sono due diversi eseguibili: farm.c e client.c\
 `farm.c` è un eseguibile che prende da linea di comando un (lista di) file contenenti long, per ognuno ne calcola la somma e la invia al server.\
 `client.c` interroga il server per sapere se ha memorizzate determinate coppie `(somma, nomefile)` e le stampa a video.
